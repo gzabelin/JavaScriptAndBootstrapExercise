@@ -1,0 +1,68 @@
+ .panel-footer{
+    border: 1px solid #ddd !important;
+     border-radius: 3px !important;
+     margin-bottom: 10px;
+     padding: 15px;
+}
+
+#pageHeader{
+    padding-bottom: 20px; 
+    padding-top: 15px;
+    
+}
+
+#eagleLogo{
+    max-height:100px;
+}
+
+#emailDiv{
+    padding-top: 44px; 
+    padding-bottom: 20px; 
+    padding-right: 5px;
+}
+
+#emailDiv>a {
+    position: relative; 
+    top: -1px;
+} 
+
+h1, h2, h3, th{
+    font-family: 'Roboto Condensed', sans-serif;
+}
+
+p {
+    font-family: 'Playfair Display', serif;
+}
+
+a, span, select, .panel-footer>p  {
+    font-family: 'Roboto', sans-serif;
+}
+
+
+.btn-info{
+    background-color: #3c80be !important;
+    border-color: #316390 !important;
+}
+
+h1 {
+    font-weight: bolder;
+    letter-spacing: 3px;
+}
+
+#dataFilters{
+    margin-bottom: 5px;
+    padding-left: 20px;
+    padding-right: 20px;
+}
+
+th {
+    font-size: 16px;
+}
+
+div>p{
+    font-size: 16px;
+}
+
+.panel-footer>p {
+    margin-bottom: 0px;
+}

@@ -1,639 +1,303 @@
-var members = data.results[0].members;
+var fetchTime = localStorage.getItem("fetchTime");
+console.log("this is fetch time: " + fetchTime);
+
+var currentTime = Date.now();
+console.log("this is current time: " + currentTime);
+
+var elapsedTimeInMinutes = (currentTime-fetchTime)/(1000*60);
+console.log("this is elapsed time in minutes: " + elapsedTimeInMinutes);
 
 
+var checkDataAvailability = JSON.parse(localStorage.getItem("houseData"));
 
+if ((checkDataAvailability == null) || (elapsedTimeInMinutes>1440)){
+    
+    console.log("fetching data");
 
-function createHouseTable (members){
-        
-    
-    
-    
-        var tableBody = document.getElementById("house-table");    
-    
-        
+    fetch ("https://api.propublica.org/congress/v1/113/house/members.json", {
 
-    
-//        var cleanTable = tableBody.getElementsByTagName("tr");
-//    
-//
-//        if (cleanTable.length>0){
-//                for (i=0; i<cleanTable.length; i++){
-//                    
-//                    //var tableRow = cleanTable[i];
-//                    //tableBody.removeChild(tableRow);
-//                    
-//                    var element = cleanTable[i];
-//                    element.className = 'hidden';
-    
-                    //alternative to "hidden" class: 
-                      //  element.style.display = ""
-//                    
-//                }
-//            }
-//    
-//    
-//    THE SOLUTION WITH cleanTable[i] WAS NOT WORKING
-//    BECAUSE BY DELETING CHILDREN FROM THE ARRAY, I WAS CHANGING THE LENGTH OF THE ARRAY
-    
-    
-        
-        
-        var cleanTable = tableBody.getElementsByTagName("tr");
-    
-    
-        if (cleanTable.length>0){
-            for (i=cleanTable.length; i>0; i--){
-                tableBody.removeChild(cleanTable[0]); 
-                 console.log("length before compiling array: " + cleanTable.length);
-                
-            }
+        method: "GET",
+        headers: {
+            'X-API-Key': "KkP9lUsuKv81Rw5UTW7A5dBQqt2vAOpr0ECdyvea"
         }
 
-    
-    
+    }).then(function (response){
 
-        
-    
-
-    
-        
-    //THIS SOLUTION WORKS
-      //  tableBody.innerHTML = "";
-
-
-    
-
-        for (i = 0; i < members.length; i++) {
-
-            var tableRow = document.createElement("tr");
-
-            var cell1 = document.createElement("td");
-            var cell4 = document.createElement("td");
-            var cell5 = document.createElement("td");
-            var cell6 = document.createElement("td");
-            var cell7 = document.createElement("td");
-
-            tableRow.appendChild(cell1);
-
-            var anchorLink = document.createElement("a");
-            anchorLink.setAttribute('href', members[i].url);
-
-            if (members[i].middle_name === null) {
-                members[i].middle_name = "";
-            }
-
-            anchorLink.textContent = members[i].first_name + " " + members[i].middle_name + " " + members[i].last_name;
-
-
-
-            cell1.appendChild(anchorLink);
-
-
-
-            cell4.textContent = members[i].state;
-            tableRow.appendChild(cell4);
-
-
-            cell5.textContent = members[i].party;
-            tableRow.appendChild(cell5);
-
-
-            cell6.textContent = members[i].seniority;
-            tableRow.appendChild(cell6);
-
-            cell7.textContent = members[i].votes_with_party_pct;
-            tableRow.appendChild(cell7);
-
-
-
-            tableBody.appendChild(tableRow);
-
-
+        if (response.ok){
+            return response.json();
         }
-//            console.log("length after compiling array: " + cleanTable.length);
-}
+        throw new Error(response.statusText);
 
+    }).then(function (json){
 
-
-
-
-
-
-
-
-
-
-
-createHouseTable (members);
-
-
-
-
-
-
-
-
-
-//document.getElementById("dem").addEventListener("click", listDems);
-//    
-//function listDems() {
-//
-//    var demsOnly = [];
-//        
-//        for (i = 0; i < members.length; i++) {
-//
-//            if (members[i].party === "D") {
-//                
-//                demsOnly.push(members[i]);
-//            }
-//        }
-//    createHouseTable (demsOnly);
-//}
-
-
-
-
-
-
-
-
-
-
-function setPoliticalClassesToDataRows (){
-    
-    var numberOfRows = document.getElementById("house-table").childElementCount;
-    
-    
-    for (i=0; i<numberOfRows; i++){                       
+        window.localStorage.setItem("fetchTime", Date.now());
+        
+        var receivedData = json;
+        window.localStorage.setItem("houseData", JSON.stringify(receivedData));
+        var storedData = JSON.parse(localStorage.getItem("houseData"));
+        var members = storedData.results[0].members;
         
         
-        var houseTable = document.getElementById("house-table");     
+        if (document.getElementById("pageBody") !== null){
         
-        var dataRow = houseTable.getElementsByTagName("tr")[i];     
-        
-        
-        if (dataRow.childNodes[2].textContent === "D") {                 
-            dataRow.setAttribute("class", "democrat_data_row");
-        }
-        
-        else if (dataRow.childNodes[2].textContent === "R") {
-            dataRow.setAttribute("class", "republican_data_row");
-        }
-
+            callVue(members);
+            populateDropdownListOfStates(createArrayOfAmericanStates(members));}
         else{
-            dataRow.setAttribute("class", "independent_data_row");
-        }
-    }
-}
-
-setPoliticalClassesToDataRows();
-
-
-
-
-
-
-
-
-
-var dataRow = document.getElementsByTagName("tr")[2];    ////////////// this works!!!
-
-
-// console.log(dataRow.childNodes[0].textContent);     /// this gets me the name of the senator in the specified Data Row. 
-
-// console.log(dataRow.childNodes[0].nodeValue); /////why null? 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//window.addEventListener("load", tickAllBoxes);                                   // this one isn't necessary any more
-
-function tickAllBoxes(){
-    
-    var partyCheckboxes = party_filters.getElementsByTagName("input");
-        
-    for (i=0; i<partyCheckboxes.length; i++){
-        
-     //   partyCheckboxes[i].setAttribute(":checked");
-            
-            partyCheckboxes[i].checked = true;
-       
-    }
-}
-
-
-
-
-
-var checkBoxes = document.getElementById("party_filters").getElementsByTagName("input");        // SADLY I CANT ADD EVENTLISTENER TO VAR CHECKBOXES :( 
-
-//checkBoxes[1].setAttribute("class", "setting some checkbox classes")
-
-
-
-
-
-document.getElementById("party_filters").addEventListener("click", filterByPartyAndState);
-
-
-
-function removeDirtySocialists(){
-
-    console.log("a click has been made!");
-    
-    
-    var filthySocialists = document.getElementsByClassName("democrat_data_row");
-    
-    
-   // if (checkBoxes[0].hasAttribute("checked") !== 'true'){
-    
-    if (checkBoxes[0].checked !==true){
-        
-        console.log("if statement engaged");
-        
-        for (i=0; i<filthySocialists.length; i++){
-             filthySocialists[i].classList.add("hidden");                                    // now this works! 
-        }    
-        
-//        document.getElementsByClassName("democrat_data_row").setAttribute("class", "hidden");     // doesnt work because i need a loop
-        
-//        for (i=filthySocialists.length; i>0; i--){
-//            
-//             filthySocialists[0].setAttribute("class", "hidden");                         // this works
-//            
-//            // filthySocialists[0].classList.add("hidden");                               // this doesn't work :( 
-//      
-//        }   
-//      
-    }
-    
-    else {
-            console.log("else statement engaged");
-
-            for (i = 0; i < filthySocialists.length; i++) {
-                filthySocialists[i].classList.remove("hidden");
+            generalStatsByParty(members);
             }
+        
+        if (document.getElementById("bottom_attendance") !== null){
+                createATTENDANCETableFromData("bottom_attendance", houseWORSTattendance(members));
+                createATTENDANCETableFromData("top_attendance", houseBESTattendance(members));
         }
+        else if (document.getElementById("bottom_loyalty") !== null){
+                createLOYALTYTableFromData("top_loyalty", houseBESTloyalty(members));
+                createLOYALTYTableFromData("bottom_loyalty", houseWORSTloyalty(members));
+        }
+        
+
+    }).catch(function(error){
+
+        console.log("Request failed: " + error.message);
+
+    });
 }
 
-
-
-
-
-
-
-
-
-
-
-// I HAVE A BUG
-
-
-// IF THE INDPENDENT BOX IS UNTICKED,
-// AND THE REPUBLICAN BOX ALSO GETS UNTICKED
-
-// THEN CLICKING ON THE REPUBLICAN BOX AGAIN DOES NOT UNHIDE THEM
-
-
-// ...... :( 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-function filterByParty(){
-
-    
-    
-    console.log("a click has been made!");
-    
-    
-    var filthySocialists = document.getElementsByClassName("democrat_data_row");
-    
-    var illiberalBigots = document.getElementsByClassName("republican_data_row");
-    
-    var notRealPoliticians = document.getElementsByClassName("independent_data_row");
-    
-    
-    
-    
-
-    
-    if (checkBoxes[0].checked !==true){
+else {
         
-        console.log("hiding the socialists");
-        
-        for (i=0; i<filthySocialists.length; i++){
-             filthySocialists[i].classList.add("hidden");             
-        }    
-        
-
-    }
+    console.log(" retreiving data from local storage ");
+    var storedData = JSON.parse(localStorage.getItem("houseData"));
+    var members = storedData.results[0].members;
     
-    else if (checkBoxes[0].checked ==true) {
-            console.log("unhiding the socialists");
-
-            for (i = 0; i < filthySocialists.length; i++) {
-                filthySocialists[i].classList.remove("hidden");
+            if (document.getElementById("pageBody") !== null){
+        
+            callVue(members);
+            populateDropdownListOfStates(createArrayOfAmericanStates(members));}
+        else{
+            generalStatsByParty(members);
             }
-        }
-    
         
-    
-    
-    if (checkBoxes[1].checked !== true) {
-
-        console.log("hiding the bigots");
-
-        for (i = 0; i < illiberalBigots.length; i++) {
-            illiberalBigots[i].classList.add("hidden"); 
+        if (document.getElementById("bottom_attendance") !== null){
+                createATTENDANCETableFromData("bottom_attendance", houseWORSTattendance(members));
+                createATTENDANCETableFromData("top_attendance", houseBESTattendance(members));
         }
-    } 
+        else if (document.getElementById("bottom_loyalty") !== null){
+                createLOYALTYTableFromData("top_loyalty", houseBESTloyalty(members));
+                createLOYALTYTableFromData("bottom_loyalty", houseWORSTloyalty(members));
+        }
     
-    else if (checkBoxes[2].checked ==true) {
-        console.log("unmasking the bigots");
-
-        for (i = 0; i < illiberalBigots.length; i++) {
-            illiberalBigots[i].classList.remove("hidden");
-        }
-    }
-
-
-
-
-    if (checkBoxes[2].checked !== true) {
-
-        console.log("hiding the pretend-politicians");
-
-        for (i = 0; i < notRealPoliticians.length; i++) {
-            notRealPoliticians[i].classList.add("hidden"); 
-        }
-    } 
-    
-    else if (checkBoxes[2].checked ==true) {
-        console.log("unhiding the pretend-politicians");
-
-        for (i = 0; i < notRealPoliticians.length; i++) {
-            notRealPoliticians[i].classList.remove("hidden");
-        }
-    }
-    
-    
-    
-    if (checkBoxes[0].checked !== true && checkBoxes[1].checked !== true && checkBoxes[2].checked !== true){
-        
-        
-        console.log('displaying the full spectrum of American """""""politics""""""" ');
-        
-        for (i = 0; i < filthySocialists.length; i++) {
-                filthySocialists[i].classList.remove("hidden");
-        }
-        
-        for (i = 0; i < illiberalBigots.length; i++) {
-            illiberalBigots[i].classList.remove("hidden");
-        }
-        
-        for (i = 0; i < notRealPoliticians.length; i++) {
-            notRealPoliticians[i].classList.remove("hidden");
-        }
-
-    }    
 }
 
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-function createArrayOfAmericanStates (){
+function callVue (members){  
+        
+    new Vue({
     
+    el: "#pageBody",
+    
+    data: {
+            houseMembers: members,
+            demTick: false,
+            repTick: false,
+            indTick: false,
+        
+            stateBox: 'show_all'
+        
+    },
+    
+    methods: {}   
+    
+    });
+    
+
+}
+
+
+function createArrayOfAmericanStates(members) {
     var arrayOfStates = [];
-    
-    for (i=0; i < members.length; i++){
-        arrayOfStates.push(members[i].state);                  // create an array of all states
+    for (i = 0; i < members.length; i++) {
+        arrayOfStates.push(members[i].state);
     }
-    
-    arrayOfStates= arrayOfStates.sort();                       // sort array alphabetically
-    
-//    return arrayOfStates.join(", ");
-    
-    
+    arrayOfStates = arrayOfStates.sort();
     var arrayOfUniqueStates = [];
-    
-    for (i=0; i<arrayOfStates.length; i++){
-        
-        if (arrayOfStates[i] !== arrayOfStates[i+1]){
-            
-            arrayOfUniqueStates.push(arrayOfStates[i])         // push unique items to new array
+    for (i = 0; i < arrayOfStates.length; i++) {
+        if (arrayOfStates[i] !== arrayOfStates[i + 1]) {
+            arrayOfUniqueStates.push(arrayOfStates[i])
         }
     }
-
     return arrayOfUniqueStates;
 }
 
-//      console.log(createArrayOfAmericanStates());
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-function populateDropdownListOfStates (stateList){
-
+function populateDropdownListOfStates(stateList) {
     var dropDownList = document.getElementById("statesDropdownBox");
-    
-    for (i=0; i<stateList.length; i++){
-        
+    for (i = 0; i < stateList.length; i++) {
         var state = document.createElement("option");
-            
-        state.setAttribute("value", stateList[i]); 
+        state.setAttribute("value", stateList[i]);
         state.textContent = stateList[i];
-        
         dropDownList.appendChild(state);
     }
 }
 
-populateDropdownListOfStates(createArrayOfAmericanStates());
 
 
 
 
 
-
-
-
-
-document.getElementById("statesDropdownBox").addEventListener("change", filterByPartyAndState);         // event triggered by a change. note it's not "onchange". 
-
-
-
-function filterByState() {
+function generalStatsByParty (members){
     
+    var arrayOfRepublicans =[];
+    var arrayOfDemocrats =[];
+    var arrayOfIndependents =[];
     
-
-    
-    
-//    console.log("a click has been made on the dropdown box");
-    
-    var selectedOption = document.getElementById("statesDropdownBox").value;
-    
-//    console.log(selectedOption);
-  
-
-    var numberOfRows = document.getElementById("house-table").childElementCount;
-   
-    
-    if (selectedOption==="show_all"){                                                           // unhides all rows if "all states" is clicked
+    for (i = 0; i < members.length; i++) {
         
-        for (i=0; i<numberOfRows; i++){
-            var dataRow = document.getElementById("house-table").getElementsByTagName("tr")[i];     
-            dataRow.classList.remove("hidden");
+        if (members[i].party == "D"){
+            arrayOfDemocrats.push(members[i]);
+        }
+        else if (members[i].party == "R"){
+            arrayOfRepublicans.push(members[i]);
+        }
+        else if (members[i].party == "I"){
+            arrayOfIndependents.push(members[i]);
         }
     }
     
-    else{                                                                                       // this happens if a particular state is selected
-       
-        for (i=0; i<numberOfRows; i++){                       
+    document.getElementById("gen_info").getElementsByTagName("tr")[0].childNodes[3].textContent=arrayOfRepublicans.length;
+    document.getElementById("gen_info").getElementsByTagName("tr")[1].childNodes[3].textContent=arrayOfDemocrats.length;
+    document.getElementById("gen_info").getElementsByTagName("tr")[2].childNodes[3].textContent=arrayOfIndependents.length;
+    
+    
+    var repVWPTotal = 0;
+    for (i=0; i<arrayOfRepublicans.length; i++){
+        repVWPTotal += arrayOfRepublicans[i].votes_with_party_pct;    
+    }
+    var repVWPAvg = repVWPTotal/arrayOfRepublicans.length;
+    document.getElementById("gen_info").getElementsByTagName("tr")[0].childNodes[5].textContent=repVWPAvg.toFixed(2);
+    
+    
+    var demVWPTotal = 0;
+    for (i=0; i<arrayOfDemocrats.length; i++){
+        demVWPTotal += arrayOfDemocrats[i].votes_with_party_pct;    
+    }
+    var demVWPAvg = demVWPTotal/arrayOfDemocrats.length;
+    document.getElementById("gen_info").getElementsByTagName("tr")[1].childNodes[5].textContent=demVWPAvg.toFixed(2);
+    
+    var indVWPTotal = 0;
+    var indVWPAvg = 0;
+    if (arrayOfIndependents.length<1){
+        var indVWPAvg = 0;
+    }
+    else{ 
+        for (i=0; i<arrayOfIndependents.length; i++){
+            indVWPTotal += arrayOfIndependents[i].votes_with_party_pct;    
+        }
+        var indVWPAvg = indVWPTotal/arrayOfIndependents.length;
+    }
+    document.getElementById("gen_info").getElementsByTagName("tr")[2].childNodes[5].textContent=indVWPAvg.toFixed(2);
+    
+    
+    var totalRow = document.createElement("tr");
+    
+    var cellTotal = document.createElement("td");
+    cellTotal.textContent = "Total";
+    totalRow.appendChild(cellTotal);
+    
+    var cellTotalMembers = document.createElement("td");
+    var totalNoOfMembers = arrayOfRepublicans.length + arrayOfDemocrats.length + arrayOfIndependents.length;
+    cellTotalMembers.textContent = totalNoOfMembers;
+    totalRow.appendChild(cellTotalMembers);
+    
+    var cellTotalVotePCT = document.createElement("td");
+    var totalVotePCT = ((arrayOfRepublicans.length * repVWPAvg)+(arrayOfIndependents.length * indVWPAvg)+(arrayOfDemocrats.length * demVWPAvg))/totalNoOfMembers;
+    cellTotalVotePCT.textContent = totalVotePCT.toFixed(2);
+    totalRow.appendChild(cellTotalVotePCT);
+    
+    document.getElementById("gen_info").appendChild(totalRow);
+}
 
-                var dataRow = document.getElementById("house-table").getElementsByTagName("tr")[i];
+
+
+
+
+function createLOYALTYTableFromData (tableID, myArray){
+
+    var tableBody = document.getElementById(tableID);   
+    
+    for (i=0; i<myArray.length; i++){                        
+        
+        var tableRow = document.createElement("tr");
+        
+        var cellName = document.createElement("td");
+        var cellVotesMissed = document.createElement("td");
+        var cellPctMissed = document.createElement("td");
+        var anchorLink = document.createElement("a");
           
-            
-            // dataRow is defined  
-                                                   // all rows are unhidden for the purpose of refreshing
+        anchorLink.setAttribute('href', myArray[i].url);
 
-            if (dataRow.childNodes[1].textContent !== selectedOption) {   
-                 // all rows that dont match selection are hidden
-                dataRow.classList.add("hidden");
-            }else  {
-                 console.log(dataRow.childNodes[1].textContent )
-                   dataRow.classList.remove("hidden");            
-            }      
+        if (myArray[i].middle_name === null) {myArray[i].middle_name = "";}
+        anchorLink.textContent = myArray[i].first_name + " " + myArray[i].middle_name + " " + myArray[i].last_name;
+
+        cellName.appendChild(anchorLink);
+        tableRow.appendChild(cellName);
         
+        cellVotesMissed.textContent = myArray[i].total_votes;
+        tableRow.appendChild(cellVotesMissed);
         
+        cellPctMissed.textContent = myArray[i].votes_with_party_pct;
+        tableRow.appendChild(cellPctMissed);
         
-        }
+        tableBody.appendChild(tableRow);
     }
-    
 }
 
 
+function houseBESTloyalty (members){
+    
+    var cop = members.length/10;                    
+    var cop = cop.toFixed(0);
+    
+    var myArray = Array.from(members);             
 
-
-
-
-
-
-function filterByPartyAndState (){
-       
-    var filthySocialists = document.getElementsByClassName("democrat_data_row");
-    var illiberalBigots = document.getElementsByClassName("republican_data_row");
-    var notRealPoliticians = document.getElementsByClassName("independent_data_row");
+    myArray.sort(function (a, b) {                   
+        return b.votes_with_party_pct - a.votes_with_party_pct
+    });
     
-    var selectedOption = document.getElementById("statesDropdownBox").value;
-    var numberOfRows = document.getElementById("house-table").childElementCount;
-    var dataRow = document.getElementById("house-table").getElementsByTagName("tr");
+    var mostVotesMissed = myArray.slice(0, cop);  
     
-    
-    
-    if (checkBoxes[0].checked !==true ){
-        console.log("dems are unchecked -- they should be hidden");
-        for (i=0; i<filthySocialists.length; i++){
-             filthySocialists[i].classList.add("hidden");             
-        }  
-    }
-    else if (checkBoxes[0].checked ==true) {
-        console.log("dems are checked -- you should see them");
-        for (i = 0; i < filthySocialists.length; i++) {
-            filthySocialists[i].classList.remove("hidden");
-        }
-    }
-    
-    
-    
-    if (checkBoxes[1].checked !== true) {
-        console.log("reps are unchecked -- they should be hidden");
-        for (i = 0; i < illiberalBigots.length; i++) {
-            illiberalBigots[i].classList.add("hidden"); 
-        }
-    }
-    else if (checkBoxes[1].checked ==true) {
-        console.log("reps are checked -- you should see them");
-        for (i = 0; i < illiberalBigots.length; i++) {
-            illiberalBigots[i].classList.remove("hidden");
-        }
-    }
-
-    
-    
-    if (checkBoxes[2].checked !== true) {
-        console.log("indies are unchecked -- you shouldnt see them");
-        for (i = 0; i < notRealPoliticians.length; i++) {
-            notRealPoliticians[i].classList.add("hidden"); 
-        }
-    } 
-    
-    else if (checkBoxes[2].checked ==true) {
-        console.log("indies are checked -- you should see them");
-        for (i = 0; i < notRealPoliticians.length; i++) {
-            notRealPoliticians[i].classList.remove("hidden");
-        }
-    }
-    
-    
-    
-    for (i = 0; i < numberOfRows; i++) {                                       
-        if (selectedOption==="show_all"){
-            break;    
-        }
+    for (i=cop; i<myArray.length; i++){           
         
-        else if (dataRow[i].childNodes[1].textContent !== selectedOption) {
-            dataRow[i].classList.add("hidden");
-        } 
+        if (myArray[i].votes_with_party_pct == mostVotesMissed[cop-1].votes_with_party_pct){
+            mostVotesMissed.push(myArray[i]);
+        }
     }
     
+    return mostVotesMissed;    
+}
+
+
+function houseWORSTloyalty (members){
+    
+    var cop = members.length/10;            
+    var cop = cop.toFixed(0);
+    
+    var myArray = Array.from(members);           
+
+    myArray.sort(function (a, b) {               
+        return a.votes_with_party_pct - b.votes_with_party_pct
+    });
+    
+    var topVotingSenators = myArray.slice(0, cop);   
+    
+    for (i=cop; i<myArray.length; i++){            
+        
+        if (myArray[i].votes_with_party_pct == topVotingSenators[cop-1].votes_with_party_pct){
+            topVotingSenators.push(myArray[i]);
+        }
+    }
+    
+    return topVotingSenators;    
 }
 
 
@@ -644,23 +308,84 @@ function filterByPartyAndState (){
 
 
 
+function createATTENDANCETableFromData (tableID, myArray){
+
+    var tableBody = document.getElementById(tableID);    
+    
+    for (i=0; i<myArray.length; i++){                        
+        
+        var tableRow = document.createElement("tr");
+        
+        var cellName = document.createElement("td");
+        var cellVotesMissed = document.createElement("td");
+        var cellPctMissed = document.createElement("td");
+        var anchorLink = document.createElement("a");
+          
+        anchorLink.setAttribute('href', myArray[i].url);
+
+        if (myArray[i].middle_name === null) {myArray[i].middle_name = "";}
+        anchorLink.textContent = myArray[i].first_name + " " + myArray[i].middle_name + " " + myArray[i].last_name;
+
+        cellName.appendChild(anchorLink);
+        tableRow.appendChild(cellName);
+        
+        cellVotesMissed.textContent = myArray[i].missed_votes;
+        tableRow.appendChild(cellVotesMissed);
+        
+        cellPctMissed.textContent = myArray[i].missed_votes_pct;
+        tableRow.appendChild(cellPctMissed);
+        
+        tableBody.appendChild(tableRow);
+    }
+}
 
 
+function houseWORSTattendance (members){
+    
+    var cop = members.length/10;                  
+    var cop = cop.toFixed(0);
+    
+    var myArray = Array.from(members);            
+
+    myArray.sort(function (a, b) {                
+        return b.missed_votes_pct - a.missed_votes_pct
+    });
+    
+    var mostVotesMissed = myArray.slice(0, cop);   
+    
+    for (i=cop; i<myArray.length; i++){           
+        
+        if (myArray[i].missed_votes_pct == mostVotesMissed[cop-1].missed_votes_pct){
+            mostVotesMissed.push(myArray[i]);
+        }
+    }
+    
+    return mostVotesMissed;    
+}
 
 
+function houseBESTattendance (members){
+    
+    var cop = members.length/10;            
+    var cop = cop.toFixed(0);
+    
+    var myArray = Array.from(members);           
 
-
-
-
-
-
-
-
-
-
-
-
-
+    myArray.sort(function (a, b) {               
+        return a.missed_votes_pct - b.missed_votes_pct
+    });
+    
+    var topVotingSenators = myArray.slice(0, cop);   
+    
+    for (i=cop; i<myArray.length; i++){            
+        
+        if (myArray[i].missed_votes_pct == topVotingSenators[cop-1].missed_votes_pct){
+            topVotingSenators.push(myArray[i]);
+        }
+    }
+    
+    return topVotingSenators;    
+}
 
 
 

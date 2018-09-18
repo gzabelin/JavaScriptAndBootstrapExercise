@@ -6,35 +6,35 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <link href="https://fonts.googleapis.com/css?family=Playfair+Display|Roboto|Roboto+Condensed" rel="stylesheet">
+    <link rel="stylesheet" href="tgif_CSS.css">
+
 </head>
 
 <body>
-
+<div id="pageBody">
     <div class="container">
 
 
-
-
-
-        <div class="row">
-            <div class="col-sm-8">
+        <div id="pageHeader" class="row">
+            <div class="col-xs-7">
                 <div class="media-left media-middle">
-                    <img src="http://legacy.3drealms.com/duke3d/images/walkthrough/e1/e1m1_title.jpg" class="media-object" style="height:60px">
+                    <img id ="eagleLogo" src="eagle%20logo.jpg" class="media-object">
                 </div>
                 <div class="media-left media-middle">
                     <h1>TGIF</h1>
                 </div>
 
             </div>
-            <div class="col-sm-4">
+            <div class="col-xs-5">
 
-                <div class="pull-right" style="padding-top: 25px">
-                    <span class="glyphicon glyphicon-envelope"></span><a href="info@idgaf.net"> info@idgaf.net</a>
+                <div id="emailDiv" class="pull-right">
+                    <span class="glyphicon glyphicon-envelope"></span><a href="info@idgaf.net"> info@tgif.net</a>
                 </div>
             </div>
         </div>
-
-
 
 
         <nav class="navbar navbar-default">
@@ -69,6 +69,7 @@
                 </ul>
             </div>
         </nav>
+        
     </div>
 
 
@@ -97,9 +98,9 @@
 
                 <span>Filter by Party: </span>
 
-                <input id="dem" type="checkbox" name="pol_party" value="Democrat"> <span>Democrat</span>
-                <input id="rep" type="checkbox" name="pol_party" value="Republican"> <span>Republican</span>
-                <input id="ind" type="checkbox" name="pol_party" value="Independent"> <span>Independent</span>
+                <input id="dem" type="checkbox" name="pol_party" value="Democrat" v-on:click="demTick =!demTick" > <span>Democrat</span>
+                <input id="rep" type="checkbox" name="pol_party" value="Republican" v-on:click="repTick =!repTick" > <span>Republican</span>
+                <input id="ind" type="checkbox" name="pol_party" value="Independent" v-on:click="indTick =!indTick" > <span>Independent</span>
             </div>
 
 
@@ -109,7 +110,7 @@
                 <div class="pull-right">
 
                     <span>Filter by State: </span>
-                    <select id="statesDropdownBox" name="states">
+                    <select id="statesDropdownBox" name="states" v-model="stateBox">
                     <option value = "show_all" selected>All States</option>
                 </select>
 
@@ -144,6 +145,24 @@
             </thead>
 
             <tbody id="house-table">
+                <template v-for="congressman in houseMembers">
+                    
+                    
+                    
+               <template v-if='congressman.state==stateBox || stateBox=="show_all"'>
+
+                        <tr v-if='(congressman.party=="D" && demTick!==false) || (congressman.party=="R" && repTick!==false) || (congressman.party=="I" && indTick!==false) || (demTick==false && repTick==false && indTick==false)'>
+                            
+                                <td><a v-bind:href="congressman.url"> {{ congressman.first_name }} {{ congressman.middle_name }} {{ congressman.last_name }}</a> </td>
+                                <td>{{ congressman.state }}</td>
+                                <td>{{ congressman.party }}</td>
+                                <td>{{ congressman.seniority }}</td>
+                                <td>{{ congressman.votes_with_party_pct }}</td>
+                        </tr>
+                </template>
+                    
+                </template>
+                
             </tbody>
 
         </table>
@@ -160,19 +179,21 @@
 
 
 
+</div>
+    
 
 
 
-    <script type="text/javascript" src="pro-congress-113-house.js"></script>
+
+
 
     <script type="text/javascript" src="house.js"></script>
 
 
 
-
-
-
-
 </body>
+    
+
+
 
 </html>
